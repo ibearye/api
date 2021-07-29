@@ -1,5 +1,5 @@
 const express = require('express');
-const { getHTML, parseHTMLToSubject, parseHTMLToAlbum } = require('./helper');
+const { getHTML, parseHTMLToBook, parseHTMLToMovie, parseHTMLToAlbum } = require('./helper');
 
 const router = express.Router();
 
@@ -16,11 +16,14 @@ router.get('/:type/:id', async (req, res, next) => {
     if (type === 'album') {
       const { per = 18, page = 1 } = req.query;
       const mStart = (page - 1) * per;
-      const html = await getHTML(API['album'] + id + '?m_start=' + mStart);
+      const html = await getHTML(API.album + id + '?m_start=' + mStart);
       data = parseHTMLToAlbum(html);
+    } else if (type === 'movie') {
+      const html = await getHTML(API.movie + req.params.id);
+      data = parseHTMLToMovie(html);
     } else {
-      const html = await getHTML(API[req.params.type] + req.params.subject);
-      data = parseHTMLToSubject(html);
+      const html = await getHTML(API.book + req.params.id);
+      data = parseHTMLToBook(html);
     }
 
     res.app.locals.code = 2000;

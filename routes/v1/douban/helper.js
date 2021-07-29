@@ -13,7 +13,7 @@ function getHTML(url) {
       {
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36 Edg/89.0.774.57',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36',
         },
       },
       (err, res, body) => {
@@ -33,19 +33,62 @@ function getHTML(url) {
 }
 
 /**
- * 解析HTML内容为书影音记录
+ * 解析HTML内容为影音记录
  * @param {string} html
- * @returns {Promise<{cover: string, name: string, description: string, excerpt: string}>} subject
+ * @returns {Promise<{cover: string, name: string, description: string, excerpt: string}>} movie
  */
-function parseHTMLToSubject(html) {
+function parseHTMLToMovie(html) {
   const $ = cheerio.load(html);
-  const subject = {
-    cover: $('#mainpic img:first').attr('src'),
-    name: $('#content h1:first').text(),
-    description: $('#info > span.actor').text(),
-    excerpt: $('#link-report').text(),
+  const movie = {
+    cover: $('#mainpic img').eq(0).attr('src'),
+    name: $('#content h1')
+      .eq(0)
+      .text()
+      .replace(/\n/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/^\s+/, ''),
+    info: $('#info > span.actor')
+      .text()
+      .replace(/\n/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/^\s+/, ''),
+    excerpt: $('#link-report')
+      .text()
+      .replace(/\n|\s/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/^\s+/, ''),
   };
-  return subject;
+  return movie;
+}
+
+/**
+ * 解析HTML内容为书籍记录
+ * @param {string} html
+ * @returns {Promise<{cover: string, name: string, description: string, excerpt: string}>} book
+ */
+function parseHTMLToBook(html) {
+  const $ = cheerio.load(html);
+
+  const book = {
+    cover: $('#mainpic img').eq(0).attr('src'),
+    name: $('#wrapper > h1 > span')
+      .eq(0)
+      .text()
+      .replace(/\n/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/^\s+/, ''),
+    info: $('#info')
+      .text()
+      .replace(/\n/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/^\s+/, ''),
+    excerpt: $('#link-report')
+      .text()
+      .replace(/\n/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .replace(/^\s+/, ''),
+  };
+  return book;
 }
 
 /**
@@ -95,6 +138,7 @@ function parseHTMLToAlbum(html) {
 
 module.exports = {
   getHTML,
-  parseHTMLToSubject,
+  parseHTMLToBook,
+  parseHTMLToMovie,
   parseHTMLToAlbum,
 };
